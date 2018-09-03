@@ -31,20 +31,30 @@ from sklearn.preprocessing import LabelEncoder
 le = LabelEncoder()
 df.iloc[:,[0]] = le.fit_transform(df.iloc[:,[0]])
 
-X = df.iloc[:,[0,1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]]
+X = df.iloc[:,[1,2,9,11,17,18,20,21]]
 Y = df.iloc[:,[24]]
 
 from sklearn.cross_validation import train_test_split
 X_train,X_test,y_train,y_test = train_test_split(X,Y,test_size=0.25,random_state=4)
-
+'''
 from sklearn.linear_model import LinearRegression
 lr = LinearRegression()
 lr = lr.fit(X_train,y_train)
-y_pred = lr.predict(X_test)
+y_pred = lr.predict(X_test)'''
+
+
+from sklearn.ensemble import RandomForestRegressor
+rfr = RandomForestRegressor(n_estimators=100,random_state=4)
+rfr = rfr.fit(X_train,y_train)
+y_pred = rfr.predict(X_test)
 
 from sklearn.metrics import mean_absolute_error
 mean_absolute_error(y_pred,y_test)
 
+import statsmodels.formula.api as sm
+X_opt = df.iloc[:,[1,2,9,11,17,18,20,21]].values
+chk = sm.OLS(endog=Y,exog=X_opt).fit()
+chk.summary()
 
 testdf = pd.read_csv('/home/hbp16/DRIVES/Drive E/DataCamp/DengAI/dengue_features_test.csv')
 
@@ -57,8 +67,9 @@ testdf.iloc[:,[1,2]] = sc.fit_transform(testdf.iloc[:,[1,2]])
 
 le = LabelEncoder()
 testdf.iloc[:,[0]] = le.fit_transform(testdf.iloc[:,[0]])
-X_test_pred = testdf.iloc[:,[0,1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]]
-y_test_pred = lr.predict(X_test_pred)
+
+X_test_pred = testdf.iloc[:,[1,2,9,11,17,18,20,21]]
+y_test_pred = rfr.predict(X_test_pred)
 
 subdf = pd.read_csv('/home/hbp16/DRIVES/Drive E/DataCamp/DengAI/submission_format.csv')
 subdf['total_cases'] = y_test_pred
